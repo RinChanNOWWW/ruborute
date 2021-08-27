@@ -1,57 +1,56 @@
 use std::rc::Rc;
 
-use prettytable::*;
+use prettytable::{cell, row, table};
 
-use crate::{storage::MusicRecordStore, Error, Result};
+use crate::{storage::DataStore, Error, Result};
 
 use super::Cmd;
 
-pub struct CmdHelp {}
+pub struct CmdRecord {
+    store: Rc<DataStore>,
+}
 
-impl CmdHelp {
-    pub fn new() -> Self {
-        CmdHelp {}
+impl CmdRecord {
+    pub fn new(store: Rc<DataStore>) -> Self {
+        CmdRecord { store }
     }
 }
 
-impl Cmd for CmdHelp {
-    fn do_cmd(&self) -> Result<()> {
-        ptable!(
-            ["Command", "Usage", "Description"],
-            ["help", "help", "show the help information"],
-            ["get", "get <music-id>", "find music records by music id"]
-        );
-        Ok(())
+impl Cmd for CmdRecord {
+    fn name(&self) -> &str {
+        "record"
     }
-}
-
-pub struct CmdGet {
-    cmds: Vec<String>,
-    store: Rc<MusicRecordStore>,
-}
-
-impl CmdGet {
-    pub fn new(store: Rc<MusicRecordStore>, vec: Vec<String>) -> Self {
-        CmdGet { store, cmds: vec }
+    fn usage(&self) -> &str {
+        "record <music-id>"
     }
-}
+    fn description(&self) -> &str {
+        "get music record by music id"
+    }
 
-impl Cmd for CmdGet {
-    fn do_cmd(&self) -> Result<()> {
-        if self.cmds.len() != 2 {
+    fn do_cmd(&self, args: &[String]) -> Result<()> {
+        if args.len() != 1 {
             return Err(Error::DoCmdError(String::from("args unmatched.")));
         }
-        let music_id = self.cmds[1]
+        let music_id = args[0]
             .as_str()
             .parse::<u16>()
             .map_err(|e| Error::DoCmdError(e.to_string()))?;
-        let record = self.store.get_music_record(music_id);
-        match record {
-            Some(item) => {
-                ptable!(["music id", "score"], [music_id, item.score]);
-                Ok(())
+        let records = self.store.get_music_record(music_id)?;
+        if records.len() > 0 {
+            let mut tab = table!(["music id", "music name", "difficulty", "level", "score"]);
+            for rec in records {
+                tab.add_row(row![
+                    rec.get_music_id(),
+                    rec.get_music_name(),
+                    rec.get_difficulty(),
+                    rec.get_level(),
+                    rec.get_score()
+                ]);
             }
-            None => Err(Error::DoCmdError(String::from("music record not found"))),
+            tab.printstd();
+        } else {
+            println!("you have not played this music yet.")
         }
+        Ok(())
     }
 }

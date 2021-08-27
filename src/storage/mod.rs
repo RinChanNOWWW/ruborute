@@ -1,3 +1,5 @@
+mod music;
+mod record;
 mod storage;
 
-pub use storage::MusicRecordStore;
+pub use storage::{DataStore, FullRecord};

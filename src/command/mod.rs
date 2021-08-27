@@ -1,19 +1,12 @@
-use std::rc::Rc;
-
-use crate::{storage::MusicRecordStore, Error, Result};
-
-use self::command::*;
+use crate::Result;
 
 mod command;
 
 pub trait Cmd {
-    fn do_cmd(&self) -> Result<()>;
+    fn name(&self) -> &str;
+    fn usage(&self) -> &str;
+    fn description(&self) -> &str;
+    fn do_cmd(&self, args: &[String]) -> Result<()>;
 }
 
-pub fn new_command(store: Rc<MusicRecordStore>, vec: Vec<String>) -> Result<Box<dyn Cmd>> {
-    match vec[0].as_str() {
-        "help" => Ok(Box::new(CmdHelp::new())),
-        "get" => Ok(Box::new(CmdGet::new(store, vec))),
-        _ => Err(Error::OtherError(String::from("no such command"))),
-    }
-}
+pub use self::command::*;

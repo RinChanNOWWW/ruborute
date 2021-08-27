@@ -1,16 +1,13 @@
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 
 use clap::Clap;
+use prettytable::{cell, row, Cell, Row, Table};
 use rustyline::{error::ReadlineError, Editor};
 
-use crate::{
-    command,
-    storage::{self, MusicRecordStore},
-    Result,
-};
+use crate::{command::*, storage, Result};
 
 #[derive(Clap)]
-#[clap(name = "asphyxia-rsdvx", version = env!("CARGO_PKG_VERSION"), author = env!("CARGO_PKG_AUTHORS"))]
+#[clap(name = env!("CARGO_PKG_NAME"), version = env!("CARGO_PKG_VERSION"), author = env!("CARGO_PKG_AUTHORS"))]
 pub struct Opt {
     #[clap(
         long,
@@ -20,63 +17,101 @@ pub struct Opt {
     )]
     user: String,
     #[clap(
-        long = "db",
-        name = "path-to-db",
-        about = "the path of your game db file",
+        long = "record",
+        name = "path-to-record",
+        about = "the path of your game record db file",
         required = true
     )]
-    db_path: String,
+    record_path: String,
+    #[clap(
+        long = "music",
+        name = "path-to-musicdb",
+        about = "the path of your game music_db.xml file",
+        required = true
+    )]
+    music_path: String,
 }
 
-pub fn run_cmdline(opt: Opt) -> Result<()> {
-    let store = Rc::new(storage::MusicRecordStore::open(opt.user, opt.db_path)?);
+pub struct Cmdline {
+    help_table: Table,
+    cmds: HashMap<String, Box<dyn Cmd>>,
+}
 
-    println!(
-        "music records data of `{}` has been loaded.",
-        store.get_user()
-    );
+impl Cmdline {
+    pub fn new(opt: Opt) -> Result<Self> {
+        let store = Rc::new(storage::DataStore::open(
+            opt.user,
+            opt.record_path,
+            opt.music_path,
+        )?);
+        let cmds: HashMap<String, Box<dyn Cmd>> = HashMap::new();
+        let mut help_table = Table::new();
+        help_table.add_row(row!["name", "usage", "description"]);
+        help_table.add_row(row!["help", "help", "show the help information"]);
+        let mut cmdline = Cmdline { cmds, help_table };
 
-    // run interactive cmdline
-    let mut rl = Editor::<()>::new();
-    loop {
-        let readline = rl.readline(">> ");
-        match readline {
-            Ok(line) => {
-                let cmds: Vec<String> = line
-                    .trim()
-                    .split(" ")
-                    .filter(|&s| s.ne(""))
-                    .map(|s| String::from(s))
-                    .collect();
-                if cmds.len() == 0 {
-                    continue;
-                }
-                interact(Rc::clone(&store), cmds);
-            }
-            Err(ReadlineError::Eof) | Err(ReadlineError::Interrupted) => {
-                println!("Bye");
-                break;
-            }
-            Err(e) => {
-                println!("read command error: {}", &e);
-                break;
-            }
-        }
+        // add commands
+        cmdline.add_command(Box::new(CmdRecord::new(Rc::clone(&store))));
+
+        Ok(cmdline)
     }
 
-    Ok(())
-}
+    fn add_command(&mut self, cmd: Box<dyn Cmd>) {
+        self.help_table.add_row(Row::new(vec![
+            Cell::new(cmd.name()),
+            Cell::new(cmd.usage()),
+            Cell::new(cmd.description()),
+        ]));
+        self.cmds.insert(cmd.name().to_string(), cmd);
+    }
 
-fn interact(store: Rc<MusicRecordStore>, cmds: Vec<String>) {
-    let cmd = command::new_command(store, cmds);
-    match cmd {
-        Ok(c) => {
-            if let Err(e) = c.do_cmd() {
-                println!("{}", &e)
+    fn help(&self) {
+        self.help_table.printstd();
+    }
+
+    pub fn run(&self) -> Result<()> {
+        // run interactive cmdline
+        let mut rl = Editor::<()>::new();
+        loop {
+            let readline = rl.readline(">> ");
+            match readline {
+                Ok(line) => {
+                    let cmds: Vec<String> = line
+                        .trim()
+                        .split(" ")
+                        .filter(|&s| s.ne(""))
+                        .map(|s| String::from(s))
+                        .collect();
+                    self.interact(cmds);
+                }
+                Err(ReadlineError::Eof) | Err(ReadlineError::Interrupted) => {
+                    println!("Bye");
+                    break;
+                }
+                Err(e) => {
+                    println!("read command error: {}", &e);
+                    break;
+                }
             }
         }
-        Err(e) => {
-            println!("{}", &e);
+
+        Ok(())
+    }
+
+    fn interact(&self, cmds: Vec<String>) {
+        if cmds.len() == 0 {
+            return;
+        }
+        if cmds[0].as_str() == "help" {
+            self.help();
+            return;
+        }
+        if let Some(cmd) = self.cmds.get(&cmds[0]) {
+            if let Err(e) = cmd.do_cmd(&cmds[1..]) {
+                println!("{}", e);
+            }
+        } else {
+            println!("no such command");
         }
     }
 }

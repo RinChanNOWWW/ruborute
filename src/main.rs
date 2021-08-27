@@ -1,11 +1,20 @@
 use std::process::exit;
 
-use asphyxia_rsdvx::{run_cmdline, Opt};
 use clap::Clap;
+use ruborute::{Cmdline, Opt};
 
 fn main() {
-    if let Err(e) = run_cmdline(Opt::parse()) {
-        eprintln!("{}", e);
-        exit(1)
+    let cmdline = Cmdline::new(Opt::parse());
+    match cmdline {
+        Ok(cl) => {
+            if let Err(e) = cl.run() {
+                eprintln!("{}", e);
+                exit(1)
+            }
+        }
+        Err(e) => {
+            eprintln!("{}", e);
+            exit(1)
+        }
     }
 }

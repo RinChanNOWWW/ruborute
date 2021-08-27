@@ -1,28 +1,31 @@
-# asphyxia-rsdvx [WIP]
+# ruborute [WIP]
 
-asphyxia-rsdvx is a interactive command-line tool to get asphyxia@sdvx gaming data.
+**Are you 暴龍天 ?**. The ruborute is a interactive command-line tool to get asphyxia@sdvx gaming data.
 
 asphyxia-core/plugins: https://github.com/asphyxia-core/plugins
 
 ## Usage
 
 ```bash
-asphyxia-rsdvx --user={user_id} --db={path-to-db}
-
+ruborute --user={user_id} --record={path-to-recorddb} --music={path-to-musicdb}
+# implemented commands now:
 >> help
-+---------+----------------+--------------------------------+
-| Command | Usage          | Description                    |
-+---------+----------------+--------------------------------+
-| help    | help           | show the help information      |
-+---------+----------------+--------------------------------+
-| get     | get <music-id> | find music records by music id |
-+---------+----------------+--------------------------------+
->> get 1234
-+----------+----------+
-| music id | score    |
-+----------+----------+
-| 1234     | 10000000 |
-+----------+----------+
++--------+-------------------+------------------------------+
+| name   | usage             | description                  |
++--------+-------------------+------------------------------+
+| help   | help              | show the help information    |
++--------+-------------------+------------------------------+
+| record | record <music-id> | get music record by music id |
++--------+-------------------+------------------------------+
+>> record 229
+get records of music: Booths of Fighters...
++----------+--------------------+------------+-------+---------+
+| music id | music name         | difficulty | level | score   |
++----------+--------------------+------------+-------+---------+
+| 229      | Booths of Fighters | EXH        | 17    | 9600467 |
++----------+--------------------+------------+-------+---------+
+| 229      | Booths of Fighters | HVN        | 19    | 9278005 |
++----------+--------------------+------------+-------+---------+
 ```
 
 You can type Ctrl-C or Ctrl-D to exit.
