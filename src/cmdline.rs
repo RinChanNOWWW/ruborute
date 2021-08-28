@@ -47,7 +47,7 @@ impl Cmdline {
         let cmds: HashMap<String, Box<dyn Cmd>> = HashMap::new();
         let mut help_table = Table::new();
         help_table.add_row(row!["name", "usage", "description"]);
-        help_table.add_row(row!["help", "help", "show the help information"]);
+        help_table.add_row(row!["help", "help", "show the help information."]);
         let mut cmdline = Cmdline { cmds, help_table };
 
         // add commands

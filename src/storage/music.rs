@@ -1,9 +1,10 @@
 use crate::Result;
 use quick_xml;
+use rust_fuzzy_search::fuzzy_compare;
 use serde::Deserialize;
 use std::{collections::HashMap, fmt::Display, fs::File, io::BufReader, path::PathBuf};
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Difficulty {
     Unknown,
     Novice,
@@ -146,15 +147,18 @@ struct Mdb {
 
 pub struct MusicStore {
     music: HashMap<u16, Music>,
+    name_id_map: HashMap<String, u16>,
 }
 
 impl MusicStore {
     fn from_mdb(mdb: Mdb) -> Self {
         let mut music: HashMap<u16, Music> = HashMap::new();
+        let mut name_id_map: HashMap<String, u16> = HashMap::new();
         for m in mdb.music.iter() {
             music.insert(m.id, m.clone());
+            name_id_map.insert(m.get_name(), m.id);
         }
-        MusicStore { music }
+        MusicStore { music, name_id_map }
     }
 }
 
@@ -167,5 +171,27 @@ impl MusicStore {
 
     pub fn get_music(&self, music_id: u16) -> Option<&Music> {
         self.music.get(&music_id)
+    }
+
+    pub fn get_music_name(&self, music_id: u16) -> String {
+        if let Some(name) = self.get_music(music_id).map(|m| m.get_name()) {
+            name
+        } else {
+            String::from("(NOT FOUND)")
+        }
+    }
+
+    pub fn get_id_by_name(&self, name: &String, fuzzy: bool) -> Vec<u16> {
+        self.name_id_map
+            .iter()
+            .filter(|(n, _)| {
+                if fuzzy {
+                    fuzzy_compare(&name, &n) > 0.5
+                } else {
+                    name.as_str() == n.as_str()
+                }
+            })
+            .map(|(_, &id)| id)
+            .collect::<Vec<u16>>()
     }
 }
