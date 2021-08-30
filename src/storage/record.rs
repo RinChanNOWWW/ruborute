@@ -295,7 +295,9 @@ impl RecordStore {
                         let music = music_store.get_music(music_record.music_id);
                         let full_record = FullRecord::from_record_with_music(&music_record, music);
                         if let Some(rec) = records.get_mut(&full_record.get_music_id()) {
-                            rec.push(full_record.clone());
+                            if !rec.iter().any(|r| r.level == full_record.get_level()) {
+                                rec.push(full_record.clone());
+                            }
                             rec.sort_by_key(|r| r.get_level());
                         } else {
                             records.insert(full_record.get_music_id(), vec![full_record.clone()]);
