@@ -42,7 +42,7 @@ impl Display for Difficulty {
             Difficulty::Gravity => write!(f, "GRV"),
             Difficulty::Heaven => write!(f, "HVN"),
             Difficulty::Vivid => write!(f, "VVD"),
-            Difficulty::Maximum => write!(f, "MAX"),
+            Difficulty::Maximum => write!(f, "MXM"),
             Difficulty::Unknown => write!(f, "UNKNOWN"),
         }
     }
@@ -186,7 +186,7 @@ impl MusicStore {
             .iter()
             .filter(|(n, _)| {
                 if fuzzy {
-                    fuzzy_compare(&name, &n) > 0.5
+                    fuzzy_compare(&name.to_lowercase(), &n.to_lowercase()) > 0.5
                 } else {
                     name.as_str() == n.as_str()
                 }

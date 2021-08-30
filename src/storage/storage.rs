@@ -4,7 +4,7 @@ use crate::Result;
 
 use super::{
     music::MusicStore,
-    record::{FullRecord, RecordStore},
+    record::{FullRecord, RecordStore, Volfoce},
 };
 
 pub struct DataStore {
@@ -38,5 +38,13 @@ impl DataStore {
         // get id by fuzzy searching
         let ids = self.music_store.get_id_by_name(&name, true);
         self.record_store.get_record_by_id(ids)
+    }
+
+    pub fn get_best50_records(&self) -> Vec<&FullRecord> {
+        self.record_store.get_best50()
+    }
+
+    pub fn get_volforce(&self) -> Volfoce {
+        self.record_store.compute_volforce()
     }
 }
