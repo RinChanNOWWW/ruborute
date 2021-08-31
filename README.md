@@ -1,4 +1,4 @@
-# ruborute [WIP]
+# ruborute
 
 **Are you 暴龍天 ?**. The ruborute is a interactive command-line tool to get asphyxia@sdvx gaming data.
 
@@ -6,7 +6,9 @@ asphyxia-core/plugins: https://github.com/asphyxia-core/plugins
 
 ## Usage
 
-```bash
+Recommend: write `ruborute --user={user_id} --record={path-to-recorddb} --music={path-to-musicdb}` into a cmd or powershell script.
+
+```
 $ ruborute --user={user_id} --record={path-to-recorddb} --music={path-to-musicdb}
 xxx music loaded.
 your play data has been loaded.
