@@ -1,0 +1,31 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Create Release
+
+jobs:
+  deploy:
+    name: Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Build ruborute
+        run: |
+          cargo build --release --all-features
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: ruborute ${{ github.ref }}
+          draft: true
+          files: |
+            ./target/release/ruborute.exe
+          token: ${{ secrets.GITHUB_TOKEN }} 
