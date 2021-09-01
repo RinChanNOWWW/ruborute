@@ -67,7 +67,9 @@ impl Cmd for CmdRecord {
             tab.printstd();
             println!("{} record(s) founded.", records.len());
         } else {
-            println!("The music record not found.")
+            return Err(Error::DoCmdError(String::from(
+                "The music record not found.",
+            )));
         }
         Ok(())
     }
@@ -124,7 +126,9 @@ impl Cmd for CmdBest50 {
             tab.printstd();
             println!("{} record(s) founded.", records.len());
         } else {
-            println!("The music record not found.")
+            return Err(Error::DoCmdError(String::from(
+                "The music record not found.",
+            )));
         }
         Ok(())
     }
@@ -154,6 +158,70 @@ impl Cmd for CmdVolforce {
     fn do_cmd(&self, _: &[String]) -> Result<()> {
         let vf = self.store.get_volforce();
         println!("Your Volforce: {}", vf);
+        Ok(())
+    }
+}
+
+pub struct CmdCount {
+    store: Rc<DataStore>,
+}
+
+impl CmdCount {
+    pub fn new(store: Rc<DataStore>) -> Self {
+        CmdCount { store }
+    }
+}
+
+impl Cmd for CmdCount {
+    fn name(&self) -> &str {
+        "count"
+    }
+    fn usage(&self) -> &str {
+        "count <all | level>"
+    }
+    fn description(&self) -> &str {
+        "count the grades of one level(or all)"
+    }
+
+    fn do_cmd(&self, args: &[String]) -> Result<()> {
+        if args.len() != 1 {
+            return Err(Error::DoCmdError(String::from("args unmatched.")));
+        }
+        let stats = if let Ok(level) = args[0].as_str().parse::<u8>() {
+            if level < 1 || level > 20 {
+                return Err(Error::DoCmdError(String::from("args unmatched.")));
+            }
+            self.store.get_level_stat(Some(level))
+        } else if args[0].as_str() == "all" {
+            self.store.get_level_stat(None)
+        } else {
+            return Err(Error::DoCmdError(String::from("args unmatched.")));
+        };
+        let mut tab = table!([
+            "level",
+            "S",
+            "AAA+",
+            "AAA",
+            "PUC",
+            "UC",
+            "HC",
+            "NC",
+            "played/total"
+        ]);
+        for s in stats.iter() {
+            tab.add_row(row![
+                s.level(),
+                s.s_num(),
+                s.tap_num(),
+                s.ta_num(),
+                s.puc_num(),
+                s.uc_num(),
+                s.hc_num(),
+                s.nc_num(),
+                format!("{}/{}", s.played(), self.store.get_level_count(*s.level())),
+            ]);
+        }
+        tab.printstd();
         Ok(())
     }
 }

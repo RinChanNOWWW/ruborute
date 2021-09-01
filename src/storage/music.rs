@@ -128,6 +128,18 @@ impl Music {
             _ => self.difficulty.infinite.level,
         }
     }
+    pub fn has_level(&self, level: u8) -> bool {
+        if self.difficulty.novice.level == level
+            || self.difficulty.advanced.level == level
+            || self.difficulty.exhaust.level == level
+            || self.difficulty.infinite.level == level
+            || self.difficulty.maximum.level == level
+        {
+            true
+        } else {
+            false
+        }
+    }
 }
 
 impl Clone for Music {
@@ -193,5 +205,12 @@ impl MusicStore {
             })
             .map(|(_, &id)| id)
             .collect::<Vec<u16>>()
+    }
+
+    pub fn get_level_count(&self, level: u8) -> usize {
+        self.music
+            .iter()
+            .filter(|(_, m)| m.has_level(level))
+            .count()
     }
 }

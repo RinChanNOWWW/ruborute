@@ -10,6 +10,7 @@ version = "0.1.0"
 [dependencies]
 clap = "=3.0.0-beta.2"
 clap_derive = "=3.0.0-beta.2"
+derive-getters = "0.2.0"
 failure = "0.1.8"
 prettytable-rs = "0.8.0"
 quick-xml = {version = "0.22.0", features = ["encoding", "serialize"]}

@@ -54,6 +54,7 @@ impl Cmdline {
         cmdline.add_command(Box::new(CmdRecord::new(Rc::clone(&store))));
         cmdline.add_command(Box::new(CmdBest50::new(Rc::clone(&store))));
         cmdline.add_command(Box::new(CmdVolforce::new(Rc::clone(&store))));
+        cmdline.add_command(Box::new(CmdCount::new(Rc::clone(&store))));
 
         Ok(cmdline)
     }

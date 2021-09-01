@@ -4,7 +4,7 @@ use crate::Result;
 
 use super::{
     music::MusicStore,
-    record::{FullRecord, RecordStore, Volfoce},
+    record::{FullRecord, LevelStat, RecordStore, Volfoce},
 };
 
 pub struct DataStore {
@@ -46,5 +46,11 @@ impl DataStore {
 
     pub fn get_volforce(&self) -> Volfoce {
         self.record_store.compute_volforce()
+    }
+    pub fn get_level_stat(&self, level: Option<u8>) -> Vec<LevelStat> {
+        self.record_store.get_level_stat(level)
+    }
+    pub fn get_level_count(&self, level: u8) -> usize {
+        self.music_store.get_level_count(level)
     }
 }

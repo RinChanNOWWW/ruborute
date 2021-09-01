@@ -1,4 +1,5 @@
 use crate::Result;
+use derive_getters::Getters;
 use serde::Deserialize;
 use std::{collections::HashMap, fmt::Display, fs::File, io::BufReader, path::PathBuf};
 
@@ -88,7 +89,7 @@ impl Display for ClearType {
         match *self {
             ClearType::None => write!(f, "No Play"),
             ClearType::Played => write!(f, "Crash"),
-            ClearType::Complete => write!(f, "Complete"),
+            ClearType::Complete => write!(f, "NC"),
             ClearType::HardComplete => write!(f, "HC"),
             ClearType::UltimateChain => write!(f, "UC"),
             ClearType::PerfectUltimateChain => write!(f, "PUC"),
@@ -270,6 +271,44 @@ impl FullRecord {
     }
 }
 
+#[derive(Clone, Copy, Debug, Getters)]
+pub struct LevelStat {
+    level: u8,
+    /// S
+    s_num: u16,
+    /// Triple A Plus (AAA+)
+    tap_num: u16,
+    /// Triple A (AAA)
+    ta_num: u16,
+    /// Clear
+    nc_num: u16,
+    /// Hard Clear
+    hc_num: u16,
+    /// UC
+    uc_num: u16,
+    /// PUC
+    puc_num: u16,
+    /// played total number
+    played: u16,
+}
+
+impl std::ops::Add<LevelStat> for LevelStat {
+    type Output = LevelStat;
+    fn add(self, rhs: LevelStat) -> Self::Output {
+        LevelStat {
+            level: self.level,
+            s_num: self.s_num + rhs.s_num,
+            tap_num: self.tap_num + rhs.tap_num,
+            ta_num: self.ta_num + rhs.ta_num,
+            nc_num: self.nc_num + rhs.nc_num,
+            hc_num: self.hc_num + rhs.hc_num,
+            uc_num: self.uc_num + rhs.uc_num,
+            puc_num: self.puc_num + rhs.puc_num,
+            played: self.played + rhs.played,
+        }
+    }
+}
+
 /// MusicRecordStore is used to get sdvx music record from asphyxia db file.
 pub struct RecordStore {
     /// music records of current user.
@@ -355,5 +394,59 @@ impl RecordStore {
             vf_sum += rec.volfoce.0;
         }
         Volfoce(vf_sum / 50)
+    }
+
+    /// get clear and grade type of a level.
+    /// when level is None, return all level stat.
+    pub fn get_level_stat(&self, level: Option<u8>) -> Vec<LevelStat> {
+        let mut level_stat: HashMap<u8, LevelStat> = HashMap::new();
+        for r in self
+            .records
+            .iter()
+            .map(|(_, rec)| rec)
+            .collect::<Vec<&Vec<FullRecord>>>()
+            .into_iter()
+            .flatten()
+            .filter(|r| match level {
+                Some(l) => r.get_level() == l,
+                None => true,
+            })
+        {
+            let mut stat = LevelStat {
+                level: r.get_level(),
+                s_num: 0,
+                tap_num: 0,
+                ta_num: 0,
+                nc_num: 0,
+                hc_num: 0,
+                uc_num: 0,
+                puc_num: 0,
+                played: 1,
+            };
+            match r.get_clear_type() {
+                ClearType::Complete => stat.nc_num += 1,
+                ClearType::HardComplete => stat.hc_num += 1,
+                ClearType::UltimateChain => stat.uc_num += 1,
+                ClearType::PerfectUltimateChain => stat.puc_num += 1,
+                _ => {}
+            }
+            match r.get_grade() {
+                Grade::AAA => stat.ta_num += 1,
+                Grade::AAAPlus => stat.tap_num += 1,
+                Grade::S => stat.s_num += 1,
+                _ => {}
+            }
+            if let Some(old_stat) = level_stat.get_mut(&r.level) {
+                *old_stat = *old_stat + stat;
+            } else {
+                level_stat.insert(r.get_level(), stat);
+            }
+        }
+        let mut r = level_stat
+            .iter()
+            .map(|(_, &s)| s)
+            .collect::<Vec<LevelStat>>();
+        r.sort_by_key(|s| s.level);
+        r
     }
 }
