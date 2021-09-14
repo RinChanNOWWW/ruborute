@@ -6,7 +6,7 @@ use ruborute::{Cmdline, Opt};
 fn main() {
     let cmdline = Cmdline::new(Opt::parse());
     match cmdline {
-        Ok(cl) => {
+        Ok(mut cl) => {
             if let Err(e) = cl.run() {
                 eprintln!("{}", e);
                 exit(1)

@@ -574,7 +574,7 @@ checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
 
 [[package]]
 name = "ruborute"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "clap",
  "clap_derive",
@@ -584,6 +584,7 @@ dependencies = [
  "quick-xml",
  "rust-fuzzy-search",
  "rustyline",
+ "rustyline-derive",
  "serde",
  "serde_json",
 ]
@@ -634,6 +635,16 @@ dependencies = [
  "unicode-width",
  "utf8parse",
  "winapi",
+]
+
+[[package]]
+name = "rustyline-derive"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "688599bdab9f42105d0ae1494335a9ffafdeb7d36325e6b10fd4abc5829d6284"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]

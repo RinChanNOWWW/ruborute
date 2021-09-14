@@ -1,6 +1,6 @@
 # ruborute
 
-**Are you 暴龍天 ?**. The ruborute is a interactive command-line tool to get asphyxia@sdvx gaming data.
+**Are you 暴龍天 ?**. The ruborute is an interactive command-line tool to get asphyxia@sdvx gaming data.
 
 asphyxia-core/plugins: https://github.com/asphyxia-core/plugins
 
@@ -57,8 +57,6 @@ Music 1226: <Black night>
 +------+----------+----------------+------------+-------+---------+-------+------------+----------+
 | #4   | 1139     | Decoy          | MXM        | 17    | 9929078 | S     | HC         | 18.077   |
 +------+----------+----------------+------------+-------+---------+-------+------------+----------+
-| #5   | 933      | 見世物ライフ     | MXM        | 17    | 9925958 | S     | HC         | 18.072   |
-+------+----------+----------------+------------+-------+---------+-------+------------+----------+
 ....
 +------+----------+----------------+------------+-------+---------+-------+------------+----------+
 50 record(s) founded.
@@ -90,7 +88,7 @@ Your Volforce: 17.714
 +-------+---+------+-----+-----+----+-----+----+--------------+
 ```
 
-You can type Ctrl-C or Ctrl-D to exit.
+You can type Ctrl-D to exit.
 
 ## Features
 
@@ -99,6 +97,9 @@ You can type Ctrl-C or Ctrl-D to exit.
 - [x] Compute VF.
 - [x] Get the best 50 records.
 - [x] Collect more detail statistics (Such as count of a clear type).
+- [x] Press "Tab" button to complete the commands.
+- [x] History hints supported.
+- [x] Type Ctrl-C to interrupt current input.
 - [ ] Range get records in VF order.
 - [ ] Get music infomation by music id.
 - [ ] Get music informaton by music name.
