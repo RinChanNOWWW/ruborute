@@ -313,14 +313,14 @@ impl std::ops::Add<LevelStat> for LevelStat {
 pub struct RecordStore {
     /// music records of current user.
     /// Vec<Record> contained music records of different levels.
-    records: HashMap<u16, Vec<FullRecord>>,
+    records: HashMap<u16, HashMap<u8, FullRecord>>,
 }
 
 impl RecordStore {
     /// open db file and load all music data to memory
     pub fn open(user: String, path: impl Into<PathBuf>, music_store: &MusicStore) -> Result<Self> {
         let path = path.into();
-        let mut records: HashMap<u16, Vec<FullRecord>> = HashMap::new();
+        let mut records: HashMap<u16, HashMap<u8, FullRecord>> = HashMap::new();
         // load data
         let mut reader = BufReader::new(File::open(&path)?);
         let mut stream = serde_json::Deserializer::from_reader(&mut reader).into_iter::<Record>();
@@ -334,12 +334,20 @@ impl RecordStore {
                         let music = music_store.get_music(music_record.music_id);
                         let full_record = FullRecord::from_record_with_music(&music_record, music);
                         if let Some(rec) = records.get_mut(&full_record.get_music_id()) {
-                            if !rec.iter().any(|r| r.level == full_record.get_level()) {
-                                rec.push(full_record.clone());
+                            let level = full_record.get_level();
+                            if !rec.contains_key(&level) {
+                                rec.insert(level, full_record);
+                            } else if let Some(r) = rec.get_mut(&level) {
+                                // record the best record
+                                if r.get_volforce() < full_record.get_volforce() {
+                                    *r = full_record;
+                                }
                             }
-                            rec.sort_by_key(|r| r.get_level());
                         } else {
-                            records.insert(full_record.get_music_id(), vec![full_record.clone()]);
+                            let mut m = HashMap::new();
+                            let id = full_record.get_music_id();
+                            m.insert(full_record.get_level(), full_record);
+                            records.insert(id, m);
                         }
                     }
                 }
@@ -357,8 +365,9 @@ impl RecordStore {
             .iter()
             .filter(|(id, _)| music_id.contains(&id))
             .map(|(_, rec)| rec)
-            .collect::<Vec<&Vec<FullRecord>>>()
+            .collect::<Vec<&HashMap<u8, FullRecord>>>()
             .into_iter()
+            .map(|map| map.values().collect::<Vec<&FullRecord>>())
             .flatten()
             .collect::<Vec<&FullRecord>>()
     }
@@ -369,21 +378,18 @@ impl RecordStore {
             .records
             .iter()
             .map(|(_, rec)| rec)
-            .collect::<Vec<&Vec<FullRecord>>>()
+            .collect::<Vec<&HashMap<u8, FullRecord>>>()
             .into_iter()
+            .map(|map| map.values().collect::<Vec<&FullRecord>>())
             .flatten()
             .collect::<Vec<&FullRecord>>();
         records.sort_by_key(|rec| rec.volfoce);
-        let mut res = Vec::with_capacity(50);
-        let mut count = 0;
-        for &rec in records.iter().rev() {
-            if count == 50 {
-                break;
-            }
-            res.push(rec);
-            count += 1;
-        }
-        res
+        records
+            .iter()
+            .rev()
+            .take(50)
+            .cloned()
+            .collect::<Vec<&FullRecord>>()
     }
 
     /// compute the complete volforce
@@ -404,8 +410,9 @@ impl RecordStore {
             .records
             .iter()
             .map(|(_, rec)| rec)
-            .collect::<Vec<&Vec<FullRecord>>>()
+            .collect::<Vec<&HashMap<u8, FullRecord>>>()
             .into_iter()
+            .map(|map| map.values().collect::<Vec<&FullRecord>>())
             .flatten()
             .filter(|r| match level {
                 Some(l) => r.get_level() == l,
