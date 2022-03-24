@@ -1,0 +1,11 @@
+[asyphyxia]
+music_path = "music_db.xml"
+record_path = "savedata.db"
+refid = "refid"
+[bemaniutils]
+db_address = "localhost"
+db_name = "bemani"
+db_password = "bemani"
+db_port = 3306
+db_user = "bemani"
+username = "rinchannow"

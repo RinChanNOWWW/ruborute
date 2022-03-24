@@ -1,33 +1,30 @@
+use crate::config::AsphyxiaConfig;
 use crate::data_source::DataSource;
 use crate::model::*;
 use crate::Result;
 use quick_xml;
+use rust_fuzzy_search::fuzzy_compare;
 use serde::Deserialize;
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
-use rust_fuzzy_search::fuzzy_compare;
-
-pub struct AsphyxiaDataStore {
+pub struct AsphyxiaDataSource {
     record_store: RecordStore,
     music_store: MusicStore,
 }
 
-impl AsphyxiaDataStore {
-    pub fn open(
-        user: String,
-        record_path: impl Into<PathBuf>,
-        music_path: impl Into<PathBuf>,
-    ) -> Result<Self> {
-        let music_store = MusicStore::open(music_path)?;
-        let record_store = RecordStore::open(user, record_path, &music_store)?;
+impl AsphyxiaDataSource {
+    pub fn open(conf: AsphyxiaConfig) -> Result<Self> {
+        let music_store = MusicStore::open(conf.music_path)?;
+        let record_store = RecordStore::open(conf.refid, conf.record_path, &music_store)?;
 
-        Ok(AsphyxiaDataStore {
+        println!("data loaded from Asphyxia succeeded!");
+        Ok(AsphyxiaDataSource {
             music_store,
             record_store,
         })
     }
 }
-impl DataSource for AsphyxiaDataStore {
+impl DataSource for AsphyxiaDataSource {
     fn get_record_by_id(&self, music_id: Vec<u16>) -> Vec<FullRecord> {
         for &id in music_id.iter() {
             println!("Music {}: <{}>", id, self.music_store.get_music_name(id));

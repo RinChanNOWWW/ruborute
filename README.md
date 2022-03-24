@@ -1,15 +1,31 @@
 # ruborute
 
-**Are you 暴龍天 ?**. The ruborute is an interactive command-line tool to get asphyxia@sdvx gaming data.
+**Are you 暴龍天 ?**. The ruborute is an interactive command-line tool to get your SDVX gaming data.
 
-asphyxia-core/plugins: https://github.com/asphyxia-core/plugins
+Supported gaming server:
+
+- asphyxia@sdvx: https://github.com/asphyxia-core/plugins
+- [WIP]bemaniutils: https://github.com/DragonMinded/bemaniutils
 
 ## Usage
 
-Recommend: write `ruborute --user={user_id} --record={path-to-recorddb} --music={path-to-musicdb}` into a cmd or powershell script.
+The most recommend usage:
+
+```shell
+# there is an example config.toml in the dir exmaple/
+ruborute -c config.toml 
+```
+
+Arguments information can be found by:
+
+```shell
+ruborute --help
+```
+
+After launching: 
 
 ```
-$ ruborute --user={user_id} --record={path-to-recorddb} --music={path-to-musicdb}
+$ ruborute -c config.toml
 xxx music loaded.
 your play data has been loaded.
 you have xxx records.

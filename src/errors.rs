@@ -9,6 +9,8 @@ pub enum Error {
     FromUtf8Error(string::FromUtf8Error),
     #[fail(display = "deserialize xml error: {}", _0)]
     XmlDeError(quick_xml::DeError),
+    #[fail(display = "parse toml file error: {}", _0)]
+    TomlDeError(toml::de::Error),
     #[fail(display = "do command failed: {}", _0)]
     DoCmdError(String),
     #[fail(display = "{}", _0)]
@@ -30,6 +32,12 @@ impl From<string::FromUtf8Error> for Error {
 impl From<quick_xml::DeError> for Error {
     fn from(e: quick_xml::DeError) -> Self {
         Error::XmlDeError(e)
+    }
+}
+
+impl From<toml::de::Error> for Error {
+    fn from(e: toml::de::Error) -> Self {
+        Error::TomlDeError(e)
     }
 }
 
