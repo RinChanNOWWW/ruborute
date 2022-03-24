@@ -2,22 +2,22 @@ use std::rc::Rc;
 
 use prettytable::{cell, row, table};
 
-use crate::{storage::DataStore, Error, Result};
+use crate::{data_source::DataSource, Error, Result};
 
 use super::Cmd;
 
 /// `CmdRecord` is used to get gaming data from storage.
-pub struct CmdRecord {
-    store: Rc<DataStore>,
+pub struct CmdRecord<T: DataSource> {
+    store: Rc<T>,
 }
 
-impl CmdRecord {
-    pub fn new(store: Rc<DataStore>) -> Self {
+impl<T: DataSource> CmdRecord<T> {
+    pub fn new(store: Rc<T>) -> Self {
         CmdRecord { store }
     }
 }
 
-impl Cmd for CmdRecord {
+impl<T: DataSource> Cmd for CmdRecord<T> {
     fn name(&self) -> &str {
         "record"
     }
@@ -75,17 +75,17 @@ impl Cmd for CmdRecord {
     }
 }
 
-pub struct CmdBest50 {
-    store: Rc<DataStore>,
+pub struct CmdBest50<T: DataSource> {
+    store: Rc<T>,
 }
 
-impl CmdBest50 {
-    pub fn new(store: Rc<DataStore>) -> Self {
+impl<T: DataSource> CmdBest50<T> {
+    pub fn new(store: Rc<T>) -> Self {
         CmdBest50 { store }
     }
 }
 
-impl Cmd for CmdBest50 {
+impl<T: DataSource> Cmd for CmdBest50<T> {
     fn name(&self) -> &str {
         "best50"
     }
@@ -134,17 +134,17 @@ impl Cmd for CmdBest50 {
     }
 }
 
-pub struct CmdVolforce {
-    store: Rc<DataStore>,
+pub struct CmdVolforce<T: DataSource> {
+    store: Rc<T>,
 }
 
-impl CmdVolforce {
-    pub fn new(store: Rc<DataStore>) -> Self {
+impl<T: DataSource> CmdVolforce<T> {
+    pub fn new(store: Rc<T>) -> Self {
         CmdVolforce { store }
     }
 }
 
-impl Cmd for CmdVolforce {
+impl<T: DataSource> Cmd for CmdVolforce<T> {
     fn name(&self) -> &str {
         "vf"
     }
@@ -162,17 +162,17 @@ impl Cmd for CmdVolforce {
     }
 }
 
-pub struct CmdCount {
-    store: Rc<DataStore>,
+pub struct CmdCount<T: DataSource> {
+    store: Rc<T>,
 }
 
-impl CmdCount {
-    pub fn new(store: Rc<DataStore>) -> Self {
+impl<T: DataSource> CmdCount<T> {
+    pub fn new(store: Rc<T>) -> Self {
         CmdCount { store }
     }
 }
 
-impl Cmd for CmdCount {
+impl<T: DataSource> Cmd for CmdCount<T> {
     fn name(&self) -> &str {
         "count"
     }

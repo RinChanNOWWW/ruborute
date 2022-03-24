@@ -10,7 +10,7 @@ use rustyline::{
 };
 use rustyline_derive::{Helper, Highlighter, Validator};
 
-use crate::{command::*, storage, Result};
+use crate::{command::*, data_source, Result};
 
 #[derive(Clap)]
 #[clap(name = env!("CARGO_PKG_NAME"), version = env!("CARGO_PKG_VERSION"), author = env!("CARGO_PKG_AUTHORS"))]
@@ -113,7 +113,7 @@ pub struct Cmdline {
 
 impl Cmdline {
     pub fn new(opt: Opt) -> Result<Self> {
-        let store = Rc::new(storage::DataStore::open(
+        let store = Rc::new(data_source::AsphyxiaDataStore::open(
             opt.user,
             opt.record_path,
             opt.music_path,

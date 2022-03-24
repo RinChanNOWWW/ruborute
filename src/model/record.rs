@@ -1,9 +1,7 @@
-use crate::Result;
+use super::music::{self, Music};
 use derive_getters::Getters;
 use serde::Deserialize;
-use std::{collections::HashMap, fmt::Display, fs::File, io::BufReader, path::PathBuf};
-
-use super::music::{self, Music, MusicStore};
+use std::fmt::Display;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Grade {
@@ -167,6 +165,15 @@ impl Record {
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Volfoce(u32);
 
+impl Volfoce {
+    pub fn new(vf: u32) -> Self {
+        Self(vf)
+    }
+    pub fn get_internal(&self) -> u32 {
+        self.0
+    }
+}
+
 impl Display for Volfoce {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let i = self.0 / 10_u32.pow(3);
@@ -292,6 +299,58 @@ pub struct LevelStat {
     played: u16,
 }
 
+impl LevelStat {
+    pub fn new(
+        level: u8,
+        s_num: u16,
+        tap_num: u16,
+        ta_num: u16,
+        nc_num: u16,
+        hc_num: u16,
+        uc_num: u16,
+        puc_num: u16,
+        played: u16,
+    ) -> Self {
+        Self {
+            level,
+            s_num,
+            tap_num,
+            ta_num,
+            nc_num,
+            hc_num,
+            uc_num,
+            puc_num,
+            played,
+        }
+    }
+
+    pub fn get_level(&self) -> u8 {
+        self.level
+    }
+
+    pub fn incr_s_num(&mut self, add: u16) {
+        self.s_num += add;
+    }
+    pub fn incr_tap_num(&mut self, add: u16) {
+        self.tap_num += add;
+    }
+    pub fn incr_ta_num(&mut self, add: u16) {
+        self.ta_num += add;
+    }
+    pub fn incr_nc_num(&mut self, add: u16) {
+        self.nc_num += add;
+    }
+    pub fn incr_hc_num(&mut self, add: u16) {
+        self.hc_num += add;
+    }
+    pub fn incr_uc_num(&mut self, add: u16) {
+        self.uc_num += add;
+    }
+    pub fn incr_puc_num(&mut self, add: u16) {
+        self.puc_num += add;
+    }
+}
+
 impl std::ops::Add<LevelStat> for LevelStat {
     type Output = LevelStat;
     fn add(self, rhs: LevelStat) -> Self::Output {
@@ -306,154 +365,5 @@ impl std::ops::Add<LevelStat> for LevelStat {
             puc_num: self.puc_num + rhs.puc_num,
             played: self.played + rhs.played,
         }
-    }
-}
-
-/// MusicRecordStore is used to get sdvx music record from asphyxia db file.
-pub struct RecordStore {
-    /// music records of current user.
-    /// Vec<Record> contained music records of different levels.
-    records: HashMap<u16, HashMap<u8, FullRecord>>,
-}
-
-impl RecordStore {
-    /// open db file and load all music data to memory
-    pub fn open(user: String, path: impl Into<PathBuf>, music_store: &MusicStore) -> Result<Self> {
-        let path = path.into();
-        let mut records: HashMap<u16, HashMap<u8, FullRecord>> = HashMap::new();
-        // load data
-        let mut reader = BufReader::new(File::open(&path)?);
-        let mut stream = serde_json::Deserializer::from_reader(&mut reader).into_iter::<Record>();
-        while let Some(item) = stream.next() {
-            match item {
-                Ok(music_record) => {
-                    if music_record.get_collectoin_str() == "music"
-                        && music_record.get_user_id_str() == user
-                    {
-                        // let music = music_store.
-                        let music = music_store.get_music(music_record.music_id);
-                        let full_record = FullRecord::from_record_with_music(&music_record, music);
-                        if let Some(rec) = records.get_mut(&full_record.get_music_id()) {
-                            let level = full_record.get_level();
-                            if !rec.contains_key(&level) {
-                                rec.insert(level, full_record);
-                            } else if let Some(r) = rec.get_mut(&level) {
-                                // record the best record
-                                if r.get_volforce() < full_record.get_volforce() {
-                                    *r = full_record;
-                                }
-                            }
-                        } else {
-                            let mut m = HashMap::new();
-                            let id = full_record.get_music_id();
-                            m.insert(full_record.get_level(), full_record);
-                            records.insert(id, m);
-                        }
-                    }
-                }
-                _ => {}
-            }
-        }
-        println!("your play data has been loaded.");
-        println!("you have {} records.", records.len());
-        Ok(RecordStore { records })
-    }
-
-    /// get music record by music id
-    pub fn get_record_by_id(&self, music_id: Vec<u16>) -> Vec<&FullRecord> {
-        self.records
-            .iter()
-            .filter(|(id, _)| music_id.contains(&id))
-            .map(|(_, rec)| rec)
-            .collect::<Vec<&HashMap<u8, FullRecord>>>()
-            .into_iter()
-            .map(|map| map.values().collect::<Vec<&FullRecord>>())
-            .flatten()
-            .collect::<Vec<&FullRecord>>()
-    }
-
-    /// get the top 50 vf records
-    pub fn get_best50(&self) -> Vec<&FullRecord> {
-        let mut records = self
-            .records
-            .iter()
-            .map(|(_, rec)| rec)
-            .collect::<Vec<&HashMap<u8, FullRecord>>>()
-            .into_iter()
-            .map(|map| map.values().collect::<Vec<&FullRecord>>())
-            .flatten()
-            .collect::<Vec<&FullRecord>>();
-        records.sort_by_key(|rec| rec.volfoce);
-        records
-            .iter()
-            .rev()
-            .take(50)
-            .cloned()
-            .collect::<Vec<&FullRecord>>()
-    }
-
-    /// compute the complete volforce
-    pub fn compute_volforce(&self) -> Volfoce {
-        let best50 = self.get_best50();
-        let mut vf_sum = 0;
-        for rec in best50.iter() {
-            vf_sum += rec.volfoce.0;
-        }
-        Volfoce(vf_sum / 50)
-    }
-
-    /// get clear and grade type of a level.
-    /// when level is None, return all level stat.
-    pub fn get_level_stat(&self, level: Option<u8>) -> Vec<LevelStat> {
-        let mut level_stat: HashMap<u8, LevelStat> = HashMap::new();
-        for r in self
-            .records
-            .iter()
-            .map(|(_, rec)| rec)
-            .collect::<Vec<&HashMap<u8, FullRecord>>>()
-            .into_iter()
-            .map(|map| map.values().collect::<Vec<&FullRecord>>())
-            .flatten()
-            .filter(|r| match level {
-                Some(l) => r.get_level() == l,
-                None => true,
-            })
-        {
-            let mut stat = LevelStat {
-                level: r.get_level(),
-                s_num: 0,
-                tap_num: 0,
-                ta_num: 0,
-                nc_num: 0,
-                hc_num: 0,
-                uc_num: 0,
-                puc_num: 0,
-                played: 1,
-            };
-            match r.get_clear_type() {
-                ClearType::Complete => stat.nc_num += 1,
-                ClearType::HardComplete => stat.hc_num += 1,
-                ClearType::UltimateChain => stat.uc_num += 1,
-                ClearType::PerfectUltimateChain => stat.puc_num += 1,
-                _ => {}
-            }
-            match r.get_grade() {
-                Grade::AAA => stat.ta_num += 1,
-                Grade::AAAPlus => stat.tap_num += 1,
-                Grade::S => stat.s_num += 1,
-                _ => {}
-            }
-            if let Some(old_stat) = level_stat.get_mut(&r.level) {
-                *old_stat = *old_stat + stat;
-            } else {
-                level_stat.insert(r.get_level(), stat);
-            }
-        }
-        let mut r = level_stat
-            .iter()
-            .map(|(_, &s)| s)
-            .collect::<Vec<LevelStat>>();
-        r.sort_by_key(|s| s.level);
-        r
     }
 }
