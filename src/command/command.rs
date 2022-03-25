@@ -197,17 +197,7 @@ impl<T: DataSource> Cmd for CmdCount<T> {
         } else {
             return Err(Error::DoCmdError(String::from("args unmatched.")));
         };
-        let mut tab = table!([
-            "level",
-            "S",
-            "AAA+",
-            "AAA",
-            "PUC",
-            "UC",
-            "HC",
-            "NC",
-            "played/total"
-        ]);
+        let mut tab = table!(["level", "S", "AAA+", "AAA", "PUC", "UC", "HC", "NC", "played"]);
         for s in stats.iter() {
             tab.add_row(row![
                 s.level(),
@@ -218,7 +208,7 @@ impl<T: DataSource> Cmd for CmdCount<T> {
                 s.uc_num(),
                 s.hc_num(),
                 s.nc_num(),
-                format!("{}/{}", s.played(), self.store.get_level_count(*s.level())),
+                format!("{}", s.played()),
             ]);
         }
         tab.printstd();

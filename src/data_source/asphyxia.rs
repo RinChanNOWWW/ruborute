@@ -1,5 +1,6 @@
 use crate::config::AsphyxiaConfig;
 use crate::data_source::DataSource;
+use crate::model;
 use crate::model::*;
 use crate::Result;
 use quick_xml;
@@ -48,9 +49,6 @@ impl DataSource for AsphyxiaDataSource {
     fn get_level_stat(&self, level: Option<u8>) -> Vec<LevelStat> {
         self.record_store.get_level_stat(level)
     }
-    fn get_level_count(&self, level: u8) -> usize {
-        self.music_store.get_level_count(level)
-    }
 }
 
 /// MusicRecordStore is used to get sdvx music record from asphyxia db file.
@@ -76,7 +74,7 @@ impl RecordStore {
                     {
                         // let music = music_store.
                         let music = music_store.get_music_ref(music_record.get_music_id());
-                        let full_record = FullRecord::from_record_with_music(&music_record, music);
+                        let full_record = music_record.to_full_record(music);
                         if let Some(rec) = records.get_mut(&full_record.get_music_id()) {
                             let level = full_record.get_level();
                             if !rec.contains_key(&level) {
@@ -98,8 +96,7 @@ impl RecordStore {
                 _ => {}
             }
         }
-        println!("your play data has been loaded.");
-        println!("you have {} records.", records.len());
+        println!("{} records loaded.", records.len());
         Ok(RecordStore { records })
     }
 
@@ -202,6 +199,74 @@ impl RecordStore {
     }
 }
 
+#[derive(Debug, Deserialize)]
+pub struct Record {
+    #[serde(default)]
+    collection: String,
+    #[serde(rename = "mid", default)]
+    music_id: u16,
+    #[serde(rename = "type", default)]
+    music_type: u8,
+    #[serde(default)]
+    score: u32,
+    #[serde(rename = "clear", default)]
+    clear_type: u8,
+    #[serde(default)]
+    grade: u8,
+    #[serde(rename = "__refid", default)]
+    user_id: String,
+}
+
+impl Record {
+    pub fn get_collectoin_str(&self) -> &str {
+        self.collection.as_str()
+    }
+    pub fn get_music_id(&self) -> u16 {
+        self.music_id
+    }
+    pub fn get_score(&self) -> u32 {
+        self.score
+    }
+    pub fn get_user_id_str(&self) -> &str {
+        self.user_id.as_str()
+    }
+    pub fn get_music_type(&self) -> u8 {
+        self.music_type
+    }
+    pub fn get_grade(&self) -> u8 {
+        self.grade
+    }
+    pub fn get_clear_type(&self) -> u8 {
+        self.clear_type
+    }
+
+    pub fn to_full_record(&self, mus: Option<&Music>) -> FullRecord {
+        let mut ful_rec = FullRecord {
+            music_id: self.get_music_id(),
+            music_name: String::from("(NOT FOUND)"),
+            difficulty: model::Difficulty::Unknown,
+            level: 0,
+            score: self.get_score(),
+            grade: Grade::from(self.get_grade()),
+            clear_type: ClearType::from(self.get_clear_type()),
+            volfoce: Volfoce::default(),
+        };
+        if let Some(m) = mus {
+            ful_rec.music_name = m.get_name();
+            ful_rec.difficulty =
+                model::Difficulty::from(self.get_music_type()).inf_ver(m.get_inf_ver());
+            ful_rec.level = m.get_level(self.get_music_type());
+        }
+        ful_rec.volfoce = compute_volforce(
+            ful_rec.level,
+            ful_rec.score,
+            ful_rec.grade,
+            ful_rec.clear_type,
+        );
+        ful_rec
+    }
+}
+
 #[derive(Debug, Deserialize, PartialEq)]
 struct Mdb {
     music: Vec<Music>,
@@ -227,7 +292,6 @@ impl MusicStore {
 impl MusicStore {
     pub fn open(path: impl Into<PathBuf>) -> Result<Self> {
         let mdb: Mdb = quick_xml::de::from_reader(BufReader::new(File::open(path.into())?))?;
-        println!("{} music loaded.", mdb.music.len());
         Ok(MusicStore::from_mdb(mdb))
     }
 
@@ -255,12 +319,5 @@ impl MusicStore {
             })
             .map(|(_, &id)| id)
             .collect::<Vec<u16>>()
-    }
-
-    pub fn get_level_count(&self, level: u8) -> usize {
-        self.music
-            .iter()
-            .filter(|(_, m)| m.has_level(level))
-            .count()
     }
 }

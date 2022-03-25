@@ -28,6 +28,9 @@ pub struct BemaniutilsConfig {
 
     #[clap(long, default_value = "", help = "the user to query")]
     pub username: String,
+
+    #[clap(long, default_value = "6", help = "the game version")]
+    pub game_version: u8,
 }
 
 impl Default for BemaniutilsConfig {
@@ -39,6 +42,7 @@ impl Default for BemaniutilsConfig {
             db_user: "root".to_string(),
             db_password: "".to_string(),
             username: "".to_string(),
+            game_version: 6,
         }
     }
 }

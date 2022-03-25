@@ -13,6 +13,8 @@ pub enum Error {
     TomlDeError(toml::de::Error),
     #[fail(display = "do command failed: {}", _0)]
     DoCmdError(String),
+    #[fail(display = "connect to mysql failed: {}", _0)]
+    MySQLError(mysql::Error),
     #[fail(display = "{}", _0)]
     OtherError(String),
 }
@@ -38,6 +40,12 @@ impl From<quick_xml::DeError> for Error {
 impl From<toml::de::Error> for Error {
     fn from(e: toml::de::Error) -> Self {
         Error::TomlDeError(e)
+    }
+}
+
+impl From<mysql::Error> for Error {
+    fn from(e: mysql::Error) -> Self {
+        Error::MySQLError(e)
     }
 }
 

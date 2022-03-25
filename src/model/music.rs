@@ -128,18 +128,6 @@ impl Music {
             _ => self.difficulty.infinite.level,
         }
     }
-    pub fn has_level(&self, level: u8) -> bool {
-        if self.difficulty.novice.level == level
-            || self.difficulty.advanced.level == level
-            || self.difficulty.exhaust.level == level
-            || self.difficulty.infinite.level == level
-            || self.difficulty.maximum.level == level
-        {
-            true
-        } else {
-            false
-        }
-    }
 }
 
 impl Clone for Music {

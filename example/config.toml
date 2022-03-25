@@ -8,4 +8,5 @@ db_name = "bemani"
 db_password = "bemani"
 db_port = 3306
 db_user = "bemani"
+game_version = 6
 username = "rinchannow"

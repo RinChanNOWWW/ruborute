@@ -1,6 +1,5 @@
-use super::music::{self, Music};
+use super::music::{self};
 use derive_getters::Getters;
-use serde::Deserialize;
 use std::fmt::Display;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -36,6 +35,7 @@ impl Display for Grade {
     }
 }
 
+// for asyphyxia format
 impl From<u8> for Grade {
     fn from(g: u8) -> Self {
         match g {
@@ -49,6 +49,25 @@ impl From<u8> for Grade {
             8 => Grade::AAA,
             9 => Grade::AAAPlus,
             10 => Grade::S,
+            _ => Grade::None,
+        }
+    }
+}
+
+// for bemaniutils format
+impl From<u16> for Grade {
+    fn from(g: u16) -> Self {
+        match g {
+            200 => Grade::D,
+            300 => Grade::C,
+            400 => Grade::B,
+            500 => Grade::A,
+            550 => Grade::APlus,
+            600 => Grade::AA,
+            650 => Grade::AAPlus,
+            700 => Grade::AAA,
+            800 => Grade::AAAPlus,
+            900 => Grade::S,
             _ => Grade::None,
         }
     }
@@ -95,6 +114,7 @@ impl Display for ClearType {
     }
 }
 
+// for asyphyxia format
 impl From<u8> for ClearType {
     fn from(t: u8) -> Self {
         match t {
@@ -103,6 +123,20 @@ impl From<u8> for ClearType {
             3 => ClearType::HardComplete,
             4 => ClearType::UltimateChain,
             5 => ClearType::PerfectUltimateChain,
+            _ => ClearType::None,
+        }
+    }
+}
+
+// for bemaniutils format
+impl From<u16> for ClearType {
+    fn from(t: u16) -> Self {
+        match t {
+            100 => ClearType::Played,
+            200 => ClearType::Complete,
+            300 => ClearType::HardComplete,
+            400 => ClearType::UltimateChain,
+            500 => ClearType::PerfectUltimateChain,
             _ => ClearType::None,
         }
     }
@@ -120,48 +154,6 @@ impl ClearType {
     }
 }
 
-#[derive(Debug, Deserialize)]
-pub struct Record {
-    #[serde(default)]
-    collection: String,
-    #[serde(rename = "mid", default)]
-    music_id: u16,
-    #[serde(rename = "type", default)]
-    music_type: u8,
-    #[serde(default)]
-    score: u32,
-    #[serde(rename = "clear", default)]
-    clear_type: u8,
-    #[serde(default)]
-    grade: u8,
-    #[serde(rename = "__refid", default)]
-    user_id: String,
-}
-
-impl Record {
-    pub fn get_collectoin_str(&self) -> &str {
-        self.collection.as_str()
-    }
-    pub fn get_music_id(&self) -> u16 {
-        self.music_id
-    }
-    pub fn get_score(&self) -> u32 {
-        self.score
-    }
-    pub fn get_user_id_str(&self) -> &str {
-        self.user_id.as_str()
-    }
-    pub fn get_music_type(&self) -> u8 {
-        self.music_type
-    }
-    pub fn get_grade(&self) -> u8 {
-        self.grade
-    }
-    pub fn get_clear_type(&self) -> u8 {
-        self.clear_type
-    }
-}
-
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Volfoce(u32);
 
@@ -171,6 +163,12 @@ impl Volfoce {
     }
     pub fn get_internal(&self) -> u32 {
         self.0
+    }
+}
+
+impl From<u32> for Volfoce {
+    fn from(vf: u32) -> Self {
+        Self(vf)
     }
 }
 
@@ -200,14 +198,14 @@ pub fn compute_volforce(level: u8, score: u32, grade: Grade, clear: ClearType) -
 
 #[derive(Debug)]
 pub struct FullRecord {
-    music_id: u16,
-    music_name: String,
-    difficulty: music::Difficulty,
-    level: u8,
-    score: u32,
-    grade: Grade,
-    clear_type: ClearType,
-    volfoce: Volfoce,
+    pub music_id: u16,
+    pub music_name: String,
+    pub difficulty: music::Difficulty,
+    pub level: u8,
+    pub score: u32,
+    pub grade: Grade,
+    pub clear_type: ClearType,
+    pub volfoce: Volfoce,
 }
 
 impl Clone for FullRecord {
@@ -226,32 +224,6 @@ impl Clone for FullRecord {
 }
 
 impl FullRecord {
-    pub fn from_record_with_music(rec: &Record, mus: Option<&Music>) -> Self {
-        let mut ful_rec = FullRecord {
-            music_id: rec.get_music_id(),
-            music_name: String::from("(NOT FOUND)"),
-            difficulty: music::Difficulty::Unknown,
-            level: 0,
-            score: rec.get_score(),
-            grade: Grade::from(rec.get_grade()),
-            clear_type: ClearType::from(rec.get_clear_type()),
-            volfoce: Volfoce::default(),
-        };
-        if let Some(m) = mus {
-            ful_rec.music_name = m.get_name();
-            ful_rec.difficulty =
-                music::Difficulty::from(rec.get_music_type()).inf_ver(m.get_inf_ver());
-            ful_rec.level = m.get_level(rec.get_music_type());
-        }
-        ful_rec.volfoce = compute_volforce(
-            ful_rec.level,
-            ful_rec.score,
-            ful_rec.grade,
-            ful_rec.clear_type,
-        );
-        ful_rec
-    }
-
     pub fn get_music_id(&self) -> u16 {
         self.music_id
     }
