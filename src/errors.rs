@@ -15,6 +15,8 @@ pub enum Error {
     DoCmdError(String),
     #[fail(display = "connect to mysql failed: {}", _0)]
     MySQLError(mysql::Error),
+    #[fail(display = "serde json error: {}", _0)]
+    SerdeJSONError(serde_json::Error),
     #[fail(display = "{}", _0)]
     OtherError(String),
 }
@@ -46,6 +48,12 @@ impl From<toml::de::Error> for Error {
 impl From<mysql::Error> for Error {
     fn from(e: mysql::Error) -> Self {
         Error::MySQLError(e)
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(e: serde_json::Error) -> Self {
+        Error::SerdeJSONError(e)
     }
 }
 

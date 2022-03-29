@@ -54,6 +54,24 @@ impl From<u8> for Grade {
     }
 }
 
+impl Into<u8> for Grade {
+    fn into(self) -> u8 {
+        match self {
+            Grade::D => 1,
+            Grade::C => 2,
+            Grade::B => 3,
+            Grade::A => 4,
+            Grade::APlus => 5,
+            Grade::AA => 6,
+            Grade::AAPlus => 7,
+            Grade::AAA => 8,
+            Grade::AAAPlus => 9,
+            Grade::S => 10,
+            Grade::None => 0,
+        }
+    }
+}
+
 // for bemaniutils format
 impl From<u16> for Grade {
     fn from(g: u16) -> Self {
@@ -124,6 +142,19 @@ impl From<u8> for ClearType {
             4 => ClearType::UltimateChain,
             5 => ClearType::PerfectUltimateChain,
             _ => ClearType::None,
+        }
+    }
+}
+
+impl Into<u8> for ClearType {
+    fn into(self) -> u8 {
+        match self {
+            ClearType::None => 0,
+            ClearType::Played => 1,
+            ClearType::Complete => 2,
+            ClearType::HardComplete => 3,
+            ClearType::UltimateChain => 4,
+            ClearType::PerfectUltimateChain => 5,
         }
     }
 }

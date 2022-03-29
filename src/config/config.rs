@@ -24,7 +24,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            config_file: "".to_string(),
+            config_file: "config.toml".to_string(),
             asyphyxia: AsphyxiaConfig::default(),
             bemaniutils: BemaniutilsConfig::default(),
         }

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use super::DataSource;
 use crate::config::BemaniutilsConfig;
-use crate::model::{FullRecord, LevelStat, self};
+use crate::model::{music::*, record::*};
 use crate::{Result, errors};
 use mysql::prelude::*;
 use mysql::*;
@@ -44,16 +44,16 @@ impl DataSource for BemaniutilsDataSource {
         {
             let mut stat = LevelStat::new(r.get_level(), 0, 0, 0, 0, 0, 0, 0, 1);
             match r.get_clear_type() {
-                model::ClearType::Complete => stat.incr_nc_num(1),
-                model::ClearType::HardComplete => stat.incr_hc_num(1),
-                model::ClearType::UltimateChain => stat.incr_uc_num(1),
-                model::ClearType::PerfectUltimateChain => stat.incr_puc_num(1),
+                 ClearType::Complete => stat.incr_nc_num(1),
+                 ClearType::HardComplete => stat.incr_hc_num(1),
+                 ClearType::UltimateChain => stat.incr_uc_num(1),
+                 ClearType::PerfectUltimateChain => stat.incr_puc_num(1),
                 _ => {}
             }
             match r.get_grade() {
-                model::Grade::AAA => stat.incr_ta_num(1),
-                model::Grade::AAAPlus => stat.incr_tap_num(1),
-                model::Grade::S => stat.incr_s_num(1),
+                 Grade::AAA => stat.incr_ta_num(1),
+                 Grade::AAAPlus => stat.incr_tap_num(1),
+                 Grade::S => stat.incr_s_num(1),
                 _ => {}
             }
             if let Some(old_stat) = level_stat.get_mut(&r.get_level()) {
@@ -117,18 +117,18 @@ impl BemaniutilsDataSource {
             struct SData { grade: u16, clear_type: u16 }
             let mdata: Mdata = serde_json::from_str(r.mdata.as_str()).unwrap();
             let sdata: SData = serde_json::from_str(r.sdata.as_str()).unwrap();
-            let grade = model::Grade::from(sdata.grade);
-            let clear_type = model::ClearType::from(sdata.clear_type);
+            let grade =  Grade::from(sdata.grade);
+            let clear_type =  ClearType::from(sdata.clear_type);
 
             FullRecord {
                 music_id: r.songid,
                 music_name: r.name,
-                difficulty: model::Difficulty::from(r.chart),
+                difficulty: Difficulty::from(r.chart),
                 level: mdata.difficulty,
                 score: r.points,
                 grade: grade,
                 clear_type:clear_type,
-                volfoce: model::compute_volforce(mdata.difficulty, r.points, grade, clear_type),
+                volfoce: compute_volforce(mdata.difficulty, r.points, grade, clear_type),
             }
         }).collect::<Vec<FullRecord>>();
         
@@ -137,5 +137,11 @@ impl BemaniutilsDataSource {
         println!("{} records loaded.", full_records.len());
         println!("data loaded from Bemaniutils server database succeeded!");
         Ok(Self {records: full_records.into_iter().rev().collect()})
+    }
+}
+
+impl BemaniutilsDataSource {
+    pub fn get_records(&self) -> Vec<FullRecord> {
+        self.records.clone()
     }
 }

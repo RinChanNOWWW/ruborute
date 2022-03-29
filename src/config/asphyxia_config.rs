@@ -11,14 +11,14 @@ pub struct AsphyxiaConfig {
     pub refid: String,
 
     #[clap(
-        long = "record",
+        long,
         default_value = "savedata.db",
         help = "the path of your game record db file"
     )]
     pub record_path: String,
 
     #[clap(
-        long = "music",
+        long,
         default_value = "music_db.xml",
         help = "the path of your game music_db.xml file"
     )]

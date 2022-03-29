@@ -7,6 +7,8 @@ Supported gaming server:
 - asphyxia@sdvx: https://github.com/asphyxia-core/plugins
 - bemaniutils: https://github.com/DragonMinded/bemaniutils
 
+This project also contains another tool [bemaniutils_to_asphyxia](./B_TO_A.md), which is to convert bemaniutils data to asphyxia data. Click the URL for detail.
+
 ## Usage
 
 The most recommend usage:

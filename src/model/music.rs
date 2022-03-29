@@ -59,6 +59,19 @@ impl From<u8> for Difficulty {
     }
 }
 
+impl Into<u8> for Difficulty {
+    fn into(self) -> u8 {
+        match self {
+            Difficulty::Novice => 0,
+            Difficulty::Advanced => 1,
+            Difficulty::Exhaust => 2,
+            Difficulty::Infinite => 3,
+            Difficulty::Maximum => 4,
+            _ => 0,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, PartialEq, Clone, Copy)]
 struct DiffInfo {
     #[serde(rename = "difnum")]

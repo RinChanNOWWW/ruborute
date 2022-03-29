@@ -1,7 +1,7 @@
 mod asphyxia;
 mod bemaniutils;
 
-use crate::model::{FullRecord, LevelStat, Volfoce};
+use crate::model::record::{FullRecord, LevelStat, Volfoce};
 
 pub use asphyxia::AsphyxiaDataSource;
 pub use bemaniutils::BemaniutilsDataSource;

@@ -1,5 +1,2 @@
-mod music;
-mod record;
-
-pub use music::*;
-pub use record::*;
+pub mod music;
+pub mod record;
