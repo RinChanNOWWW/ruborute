@@ -50,7 +50,8 @@ impl MusicStore {
             .iter()
             .filter(|(n, _)| {
                 if fuzzy {
-                    fuzzy_compare(&name.to_lowercase(), &n.to_lowercase()) > 0.5
+                    name.to_lowercase() == n.to_lowercase()
+                        || fuzzy_compare(&name.to_lowercase(), &n.to_lowercase()) > 0.5
                 } else {
                     name.as_str() == n.as_str()
                 }

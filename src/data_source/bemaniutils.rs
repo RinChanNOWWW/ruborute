@@ -22,7 +22,7 @@ impl DataSource for BemaniutilsDataSource {
     fn get_record_by_name(&self, name: String) -> Vec<FullRecord> {
         self.records
         .iter()
-        .filter(|r| {fuzzy_compare(&name.to_lowercase(), &r.music_name) > 0.5})
+        .filter(|r| {name.to_lowercase() == r.music_name.to_lowercase() || fuzzy_compare(&name.to_lowercase(), &r.music_name.to_lowercase()) > 0.5})
         .cloned()
         .collect()
     }
