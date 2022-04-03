@@ -46,6 +46,10 @@ impl DataSource for AsphyxiaDataSource {
     fn get_level_stat(&self, level: Option<u8>) -> Vec<LevelStat> {
         self.record_store.get_level_stat(level)
     }
+
+    fn get_level_count(&self, level: u8) -> usize {
+        self.music_store.get_level_count(level)
+    }
 }
 
 /// MusicRecordStore is used to get sdvx music record from asphyxia db file.

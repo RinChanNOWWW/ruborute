@@ -73,9 +73,9 @@ impl Into<u8> for Difficulty {
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone, Copy)]
-struct DiffInfo {
+pub struct DiffInfo {
     #[serde(rename = "difnum")]
-    level: u8,
+    pub level: u8,
 }
 
 impl Default for DiffInfo {
@@ -84,25 +84,25 @@ impl Default for DiffInfo {
     }
 }
 
-#[derive(Debug, Deserialize, PartialEq, Clone, Copy)]
-struct MusicDiffculty {
+#[derive(Debug, Deserialize, PartialEq, Clone, Copy, Default)]
+pub struct MusicDiffculty {
     #[serde(default)]
-    novice: DiffInfo,
+    pub novice: DiffInfo,
     #[serde(default)]
-    advanced: DiffInfo,
+    pub advanced: DiffInfo,
     #[serde(default)]
-    exhaust: DiffInfo,
+    pub exhaust: DiffInfo,
     #[serde(default)]
-    infinite: DiffInfo,
+    pub infinite: DiffInfo,
     #[serde(default)]
-    maximum: DiffInfo,
+    pub maximum: DiffInfo,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
-struct MusicInfo {
+#[derive(Debug, Deserialize, PartialEq, Default)]
+pub struct MusicInfo {
     #[serde(rename = "title_name")]
-    name: String,
-    inf_ver: u8,
+    pub name: String,
+    pub inf_ver: u8,
 }
 
 impl Clone for MusicInfo {
@@ -114,11 +114,11 @@ impl Clone for MusicInfo {
     }
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Default)]
 pub struct Music {
-    id: u16,
-    info: MusicInfo,
-    difficulty: MusicDiffculty,
+    pub id: u16,
+    pub info: MusicInfo,
+    pub difficulty: MusicDiffculty,
 }
 
 impl Music {
@@ -139,6 +139,18 @@ impl Music {
             Difficulty::Maximum => self.difficulty.maximum.level,
             Difficulty::Unknown => 0,
             _ => self.difficulty.infinite.level,
+        }
+    }
+    pub fn has_level(&self, level: u8) -> bool {
+        if self.difficulty.novice.level == level
+            || self.difficulty.advanced.level == level
+            || self.difficulty.exhaust.level == level
+            || self.difficulty.infinite.level == level
+            || self.difficulty.maximum.level == level
+        {
+            true
+        } else {
+            false
         }
     }
 }

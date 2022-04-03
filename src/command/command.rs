@@ -208,7 +208,7 @@ impl<T: DataSource> Cmd for CmdCount<T> {
                 s.uc_num(),
                 s.hc_num(),
                 s.nc_num(),
-                format!("{}", s.played()),
+                format!("{}/{}", s.played(), self.store.get_level_count(*s.level())),
             ]);
         }
         tab.printstd();

@@ -11,8 +11,8 @@ struct Mdb {
 }
 
 pub struct MusicStore {
-    music: HashMap<u16, Music>,
-    name_id_map: HashMap<String, u16>,
+    pub music: HashMap<u16, Music>,
+    pub name_id_map: HashMap<String, u16>,
 }
 
 impl MusicStore {
@@ -58,5 +58,12 @@ impl MusicStore {
             })
             .map(|(_, &id)| id)
             .collect::<Vec<u16>>()
+    }
+
+    pub fn get_level_count(&self, level: u8) -> usize {
+        self.music
+            .iter()
+            .filter(|(_, m)| m.has_level(level))
+            .count()
     }
 }
