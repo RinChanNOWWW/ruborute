@@ -27,5 +27,5 @@ jobs:
           name: ruborute ${{ github.ref }}
           draft: true
           files: |
-            ./target/release/ruborute.exe ./target/release/bemaniutils_to_asphyxia.exe
+            ["./target/release/ruborute.exe", "./target/release/bemaniutils_to_asphyxia.exe"]
           token: ${{ secrets.GITHUB_TOKEN }} 
