@@ -59,7 +59,7 @@ pub struct AsphyxiaRecord {
     vol_rate: u8,
     #[serde(rename = "createdAt", default)]
     create_at: AsphyxiaRecordDate,
-    #[serde(rename = "updateAt", default)]
+    #[serde(rename = "updatedAt", default)]
     update_at: AsphyxiaRecordDate,
     #[serde(rename = "__a", default)]
     a: String,

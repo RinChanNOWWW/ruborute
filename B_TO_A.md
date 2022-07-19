@@ -33,5 +33,5 @@ bemaniutils_to_asphyxia -c config.toml
 One record is like:
 
 ```
-{"collection":"music","mid":1068,"type":4,"score":9914182,"clear":3,"grade":10,"__refid":"AB973E24894A6D58","_id":"35","buttonRate":0,"longRate":0,"volRate":0,"createdAt":{"$$date":1648522796801},"updateAt":{"$$date":1648522796801},"__a":"sdvx@asphyxia","__s":"plugins_profile"}
+{"collection":"music","mid":1068,"type":4,"score":9914182,"clear":3,"grade":10,"__refid":"AB973E24894A6D58","_id":"35","buttonRate":0,"longRate":0,"volRate":0,"createdAt":{"$$date":1648522796801},"updatedAt":{"$$date":1648522796801},"__a":"sdvx@asphyxia","__s":"plugins_profile"}
 ```
